@@ -32,7 +32,7 @@ def write_csv(filepath, data=None, header=None, append=False):
 		print("I/O error({0}): {1}".format(e.errno, e.strerror))
 	
 	# print("Destination: ", filepath)
-	output = csv.writer(outputfile)
+	output = csv.writer(outputfile, quoting=csv.QUOTE_NONNUMERIC)
 	if header is not None:
 		output.writerow(header)
 	if data is None:
@@ -59,9 +59,11 @@ def extract_cols(filepath, outpath=None, cols=[], chunk_size=10000):
 	for row in data:
 		if (i<chunk_size):
 			i = i + 1
-			data_chunk.append({v for k, v in row.items() if k in cols})
+			data_chunk.append([v.strip() if type(v) == str
+			else v for k, v in row.items() if k in cols])
 		else:
-			data_chunk.append({v for k, v in row.items() if k in cols})
+			data_chunk.append([v.strip() if type(v) == str
+			else v for k, v in row.items() if k in cols])
 			write_csv(filepath=outpath, data=data_chunk, append=True)
 			data_chunk=[]
 			i = 0
@@ -166,4 +168,3 @@ print('Processed user json')
 
 process_yelp_review('../data/yelp_academic_dataset_review.json')
 print('Processed review json')
-
