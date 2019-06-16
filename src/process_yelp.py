@@ -25,16 +25,16 @@ def json_iterator(filepath):
 		yield line
 
 
-def write_csv(filepath, data=None, header=None, append=False, closefile=True):
+def write_csv(filepath, data=None, header=None, append=False):
 
-	try:
-		os.remove(filepath)
-	except OSError as e:
-		pass
-	
-	mode = 'w'
-	if append:
-		mode ='a'
+	mode = 'a'
+	if append == False:
+		mode = 'w'
+		try:
+			os.remove(filepath)
+		except OSError as e:
+			pass
+		
 	try:
 		outputfile = open(filepath, mode)
 	except IOError as e:
