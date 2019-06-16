@@ -6,15 +6,6 @@ def correct_path(inpath):
 	return os.path.join(abspath, inpath)
 
 
-# def readJSON(filepath):
-# 	data = []
-# 	try:
-# 		for line in open(filepath):
-# 			data.append(json.loads(line))
-# 	except IOError as e:
-# 		print("I/O error({0}): {1}".format(e.errno, e.strerror))
-# 	return data
-
 def json_iterator(filepath):
 	try:
 		file = open(filepath, 'r')
@@ -81,12 +72,12 @@ def extract_cols(filepath, outpath=None, cols=[], chunk_size=10000):
 
 
 
-def process_yelp_business(filepath, outpath=None):
+def process_yelp_business(filepath, outpath=None, chunk_size=10000):
 
 	filepath = correct_path(filepath)
 	extract_cols(filepath,cols=['business_id', 
 		'name', 'city', 'state', 'postal_code', 'latitude', 'longitude', 
-		'stars', 'review_count', 'is_open'] )
+		'stars', 'review_count', 'is_open'] , chunk_size=chunk_size)
 	
 	if outpath is None:
 		outpath = filepath[:-5]
@@ -122,7 +113,8 @@ def process_yelp_user(filepath, outpath=None, chunk_size = 10000):
 			'average_stars', 'compliment_hot','compliment_more',
 			'compliment_profile','compliment_cute','compliment_list',
 			'compliment_note','compliment_plain','compliment_cool',
-			'compliment_funny','compliment_writer','compliment_photos'])
+			'compliment_funny','compliment_writer','compliment_photos'], 
+			chunk_size=chunk_size)
 
 	if outpath is None:
 		outpath = filepath[:-5] + '_friendship.csv'
@@ -137,10 +129,12 @@ def process_yelp_user(filepath, outpath=None, chunk_size = 10000):
 	i = 0
 	for user in data:
 		friendlist = user['friends']
-		if friendlist is None:
-		    continue
+		if friendlist == "None":
+			continue
 		friendlist = [x.strip() for x in friendlist.split(",")]
 		for friend in friendlist:
+			if(friend is None):
+				continue
 			# Add only one of the two pairs that would be found
 			if (user['user_id'] < friend):
 				if (i < chunk_size):
@@ -152,13 +146,14 @@ def process_yelp_user(filepath, outpath=None, chunk_size = 10000):
 					friendships_chunk = []
 					i = 0
 	if i != 0:
-		write_csv(outpath, data=friendships_chunk)
+		write_csv(outpath, data=friendships_chunk, append=True)
 
 
-def process_yelp_review(filepath, outpath=None):
+def process_yelp_review(filepath, outpath=None, chunk_size=10000):
 	filepath = correct_path(filepath)
 	extract_cols(filepath, cols=['review_id', 
-			'user_id', 'business_id','stars', 'useful', 'funny', 'cool', 'date'])	
+			'user_id', 'business_id','stars', 'useful', 'funny', 'cool', 'date'],
+			chunk_size=chunk_size)	
 
 
 
